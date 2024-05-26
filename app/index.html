@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Processor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h2 {
+            text-align: center;
+        }
+        .container input[type="file"] {
+            display: block;
+            margin: 20px 0;
+        }
+        .container button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .container button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Upload Video</h2>
+    <input type="file" id="videoFile" accept="video/*">
+    <button id="uploadButton" onclick="uploadVideo()">Upload and Process</button>
+    <a id="downloadLink" style="display:none;" download>Download Processed Text</a>
+</div>
+
+<script>
+    async function uploadVideo() {
+        const fileInput = document.getElementById('videoFile');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert("Please select a video file.");
+            return;
+        }
+
+        const uploadButton = document.getElementById('uploadButton');
+        uploadButton.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/video/process/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const blob = await response.blob();
+            const downloadLink = document.getElementById('downloadLink');
+            const url = window.URL.createObjectURL(blob);
+
+            downloadLink.href = url;
+            downloadLink.style.display = 'block';
+            downloadLink.innerText = 'Download Processed Text';
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            uploadButton.disabled = false;
+        }
+    }
+</script>
+
+</div>
+</body>
+</html>
